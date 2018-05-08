@@ -7,6 +7,7 @@ var logger = require('morgan');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var catalog = require('./routes/catalog');
+require('dotenv').config();
 
 var app = express();
 //Set up mongoose connection
