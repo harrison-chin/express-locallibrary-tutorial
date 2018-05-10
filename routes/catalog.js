@@ -7,6 +7,12 @@ var author_controller = require('../controllers/authorController');
 var genre_controller = require('../controllers/genreController');
 var book_instance_controller = require('../controllers/bookinstanceController');
 
+require('dotenv').config();
+const keyPublishable = process.env.PUBLISHABLE_KEY;
+const keySecret = process.env.SECRET_KEY;
+const stripe = require("stripe")(keySecret);
+
+
 /// BOOK ROUTES ///
 
 // GET catalog home page.
@@ -113,5 +119,28 @@ router.get('/bookinstance/:id', book_instance_controller.bookinstance_detail);
 
 // GET request for list of all BookInstance.
 router.get('/bookinstances', book_instance_controller.bookinstance_list);
+
+/// STRIPE PAYMENT ROUTES ///
+
+router.get("/stripepay", (req, res) =>
+  res.render("stripe_pay.pug", {keyPublishable}));
+
+router.post("/charge", (req, res) => {
+  let amount = 500;
+
+  stripe.customers.create({
+     email: req.body.stripeEmail,
+    source: req.body.stripeToken
+  })
+  .then(customer =>
+    stripe.charges.create({
+      amount,
+      description: "Sample Charge",
+         currency: "usd",
+         customer: customer.id
+    }))
+  .then(charge => res.render("charge.pug"));
+});
+
 
 module.exports = router;
