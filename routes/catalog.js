@@ -12,6 +12,50 @@ const keyPublishable = process.env.PUBLISHABLE_KEY;
 const keySecret = process.env.SECRET_KEY;
 const stripe = require("stripe")(keySecret);
 
+var braintree = require('braintree');
+var gateway = require('../lib/gateway');
+
+var TRANSACTION_SUCCESS_STATUSES = [
+  braintree.Transaction.Status.Authorizing,
+  braintree.Transaction.Status.Authorized,
+  braintree.Transaction.Status.Settled,
+  braintree.Transaction.Status.Settling,
+  braintree.Transaction.Status.SettlementConfirmed,
+  braintree.Transaction.Status.SettlementPending,
+  braintree.Transaction.Status.SubmittedForSettlement
+];
+
+function formatErrors(errors) {
+  var formattedErrors = '';
+
+  for (var i in errors) { // eslint-disable-line no-inner-declarations, vars-on-top
+    if (errors.hasOwnProperty(i)) {
+      formattedErrors += 'Error: ' + errors[i].code + ': ' + errors[i].message + '\n';
+    }
+  }
+  return formattedErrors;
+}
+
+function createResultObject(transaction) {
+  var result;
+  var status = transaction.status;
+
+  if (TRANSACTION_SUCCESS_STATUSES.indexOf(status) !== -1) {
+    result = {
+      header: 'Sweet Success!',
+      icon: 'success',
+      message: 'Your test transaction has been successfully processed. See the Braintree API response and try again.'
+    };
+  } else {
+    result = {
+      header: 'Transaction Failed',
+      icon: 'fail',
+      message: 'Your test transaction has a status of ' + status + '. See the Braintree API response and try again.'
+    };
+  }
+
+  return result;
+}
 
 /// BOOK ROUTES ///
 
@@ -142,5 +186,53 @@ router.post("/charge", (req, res) => {
   .then(charge => res.render("charge.pug"));
 });
 
+/// BRAINTREE PAYMENT ROUTES ///
+
+router.get("/braintreepay", (req, res) =>
+  res.redirect('checkouts/new'));
+
+router.get('/checkouts/new', function (req, res) {
+  console.log('\033[0;32m Trace: \033[0m enter /checkouts/new');
+  gateway.clientToken.generate({}, function (err, response) {
+    console.log('\033[0;32m Client Token: \033[0m' + response.clientToken);
+    res.render('checkouts/new', {clientToken: response.clientToken, messages: ""});
+  });
+});
+
+router.get('/checkouts/:id', function (req, res) {
+  var result;
+  var transactionId = req.params.id;
+
+  console.log('\033[0;32m transactionId: \033[0m' + transactionId);
+  gateway.transaction.find(transactionId, function (err, transaction) {
+    result = createResultObject(transaction);
+    console.log('\033[0;32m transaction OK: \033[0m' + transaction);
+    res.render('checkouts/show', {transaction: transaction, result: result});
+  });
+});
+
+router.post('/checkouts', function (req, res) {
+  var transactionErrors;
+  var amount = req.body.amount; // In production you should not take amounts directly from clients
+  var nonce = req.body.payment_method_nonce;
+
+  console.log('\033[0;32m amount: \033[0m' + amount);
+  console.log('\033[0;32m nonce: \033[0m' + nonce);
+  gateway.transaction.sale({
+    amount: amount,
+    paymentMethodNonce: nonce,
+    options: {
+      submitForSettlement: true
+    }
+  }, function (err, result) {
+    if (result.success || result.transaction) {
+      res.redirect('checkouts/' + result.transaction.id);
+    } else {
+      transactionErrors = result.errors.deepErrors();
+      req.flash('error', {msg: formatErrors(transactionErrors)});
+      res.redirect('checkouts/new');
+    }
+  });
+});
 
 module.exports = router;
