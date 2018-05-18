@@ -2,6 +2,10 @@ var express = require('express');
 var router = express.Router();
 
 var Book = require('../models/book');
+var Author = require('../models/author');
+var Genre = require('../models/genre');
+var BookInstance = require('../models/bookinstance');
+var async = require('async');
 
 
 /* GET users listing. */
@@ -12,6 +16,9 @@ router.get('/', function(req, res, next) {
 module.exports = router;
 
 /// API ROUTES ///
+
+/// BOOK ROUTES ///
+// GET request for list of all Book items.
 router.get('/books', function(request, response){
   // response.send('api route to get books list');
   Book.find({}, 'title author')
@@ -21,4 +28,129 @@ router.get('/books', function(request, response){
     //Successful, so render
     response.json(list_books);
   });
+});
+
+// GET request for one Book.
+router.get('/book/:id', function(request, response){
+  async.parallel({
+      book: function(callback) {
+          Book.findById(request.params.id)
+            .populate('author')
+            // .populate('genre')
+            .exec(callback);
+      },
+      book_instance: function(callback) {
+          BookInstance.find({ 'book': request.params.id })
+            .exec(callback);
+      },
+  }, function(err, results) {
+      if (err) { return next(err); }
+      if (results.book==null) { // No results.
+          var err = new Error('Book not found');
+          err.status = 404;
+          return next(err);
+      }
+      // Successful, so render.
+      // response.json(results.book + "," + results.book_instance);
+      response.json(results.book);
+  });
+});
+
+/// AUTHOR ROUTES ///
+// GET request for list of all author items.
+router.get('/authors', function(request, response){
+  Author.find()
+  .sort([['family_name', 'ascending']])
+  .exec(function (err, list_authors) {
+    if (err) { return next(err); }
+    //Successful, so render
+    response.json(list_authors);
+  });
+});
+
+// GET request for one Author.
+router.get('/author/:id', function(request, response){
+  async.parallel({
+      author: function(callback) {
+          Author.findById(request.params.id)
+            .exec(callback);
+      },
+      authors_books: function(callback) {
+        Book.find({ 'author': request.params.id },'title summary')
+        .exec(callback)
+      },
+  }, function(err, results) {
+      if (err) { return next(err); }
+      if (results.author==null) { // No results.
+          var err = new Error('Author not found');
+          err.status = 404;
+          return next(err);
+      }
+      // Successful, so render.
+      // response.json(results.author + "," + results.authors_books);
+      response.json(results.author);
+  });
+});
+
+/// GENRE ROUTES ///
+// GET request for list of all genre items.
+router.get('/genres', function(request, response){
+  Genre.find()
+  .sort([['name', 'ascending']])
+  .exec(function (err, list_genres) {
+    if (err) { return next(err); }
+    //Successful, so render
+    response.json(list_genres);
+  });
+});
+
+// GET request for one Genre.
+router.get('/genre/:id', function(request, response){
+  async.parallel({
+      genre: function(callback) {
+          Genre.findById(request.params.id)
+            .exec(callback);
+      },
+      genre_books: function(callback) {
+          Book.find({ 'genre': request.params.id })
+            .exec(callback);
+      },
+  }, function(err, results) {
+      if (err) { return next(err); }
+      if (results.genre==null) { // No results.
+          var err = new Error('Genre not found');
+          err.status = 404;
+          return next(err);
+      }
+      // Successful, so render.
+      response.json(results.genre);
+  });
+});
+
+/// BOOKINSTANCE ROUTES ///
+// GET request for list of all bookinstance items.
+router.get('/bookinstances', function(request, response){
+  BookInstance.find()
+  .populate('book')
+  .exec(function (err, list_bookinstances) {
+    if (err) { return next(err); }
+    // Successful, so render
+    response.json(list_bookinstances);
+  });
+});
+
+// GET request for one Bookinstance.
+router.get('/bookinstance/:id', function(request, response){
+  BookInstance.findById(request.params.id)
+  .populate('book')
+  .exec(function (err, bookinstance) {
+    if (err) { return next(err); }
+    if (bookinstance==null) { // No results.
+        var err = new Error('Book copy not found');
+        err.status = 404;
+        return next(err);
+      }
+    // Successful, so render.
+    response.json(bookinstance);
+  })
 });
