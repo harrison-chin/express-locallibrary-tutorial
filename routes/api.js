@@ -37,7 +37,7 @@ function createResultObject(transaction) {
 
   if (TRANSACTION_SUCCESS_STATUSES.indexOf(status) !== -1) {
     result = {
-      header: 'Sweet Success!',
+      header: 'Checkout Success!',
       icon: 'success',
       message: 'Your test transaction has been successfully processed. See the Braintree API response and try again.'
     };

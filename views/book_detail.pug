@@ -41,7 +41,8 @@ block content
     a(href=book.url+'/update') Update Book
 
   hr  
+  //p
+  //  a(href='/catalog/stripepay') Buy Book (By Stripe)
   p
-    a(href='/catalog/stripepay') Buy Book (By Stripe)
-  p
-    a(href='/catalog/braintreepay') Buy Book (By BrainTree)
+    a(href=book.url+'/checkout') Check Out Book (By BrainTree)
+    //a(href='/catalog/braintreepay') Check Out Book (By BrainTree)

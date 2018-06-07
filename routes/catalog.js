@@ -42,7 +42,7 @@ function createResultObject(transaction) {
 
   if (TRANSACTION_SUCCESS_STATUSES.indexOf(status) !== -1) {
     result = {
-      header: 'Sweet Success!',
+      header: 'Checkout Success!',
       icon: 'success',
       message: 'Your test transaction has been successfully processed. See the Braintree API response and try again.'
     };
@@ -82,6 +82,9 @@ router.post('/book/:id/update', book_controller.book_update_post);
 
 // GET request for one Book.
 router.get('/book/:id', book_controller.book_detail);
+
+// GET request to checkout Book.
+router.get('/book/:id/checkout', book_controller.book_checkout_get);
 
 // GET request for list of all Book items.
 router.get('/books', book_controller.book_list);
@@ -166,30 +169,31 @@ router.get('/bookinstances', book_instance_controller.bookinstance_list);
 
 /// STRIPE PAYMENT ROUTES ///
 
-router.get("/stripepay", (req, res) =>
-  res.render("stripe_pay.pug", {keyPublishable}));
-
-router.post("/charge", (req, res) => {
-  let amount = 500;
-
-  stripe.customers.create({
-     email: req.body.stripeEmail,
-    source: req.body.stripeToken
-  })
-  .then(customer =>
-    stripe.charges.create({
-      amount,
-      description: "Sample Charge",
-         currency: "usd",
-         customer: customer.id
-    }))
-  .then(charge => res.render("charge.pug"));
-});
+// router.get("/stripepay", (req, res) =>
+//   res.render("stripe_pay.pug", {keyPublishable}));
+//
+// router.post("/charge", (req, res) => {
+//   let amount = 500;
+//
+//   stripe.customers.create({
+//      email: req.body.stripeEmail,
+//     source: req.body.stripeToken
+//   })
+//   .then(customer =>
+//     stripe.charges.create({
+//       amount,
+//       description: "Sample Charge",
+//          currency: "usd",
+//          customer: customer.id
+//     }))
+//   .then(charge => res.render("charge.pug"));
+// });
 
 /// BRAINTREE PAYMENT ROUTES ///
 
-router.get("/braintreepay", (req, res) =>
-  res.redirect('checkouts/new'));
+router.get("/braintreepay", function (req, res) {
+  res.redirect('checkouts/new');
+});
 
 router.get('/checkouts/new', function (req, res) {
   console.log('\033[0;32m Trace: \033[0m enter /checkouts/new');
@@ -215,14 +219,26 @@ router.post('/checkouts', function (req, res) {
   var transactionErrors;
   var amount = req.body.amount; // In production you should not take amounts directly from clients
   var nonce = req.body.payment_method_nonce;
+  var firstName = req.body.firstName;
+  var lastName = req.body.lastName;
+  var email = req.body.email;
 
   console.log('\033[0;32m amount: \033[0m' + amount);
   console.log('\033[0;32m nonce: \033[0m' + nonce);
+  console.log('\033[0;32m firstName: \033[0m' + firstName);
+  console.log('\033[0;32m lastName: \033[0m' + lastName);
+  console.log('\033[0;32m email: \033[0m' + email);
+
   gateway.transaction.sale({
     amount: amount,
     paymentMethodNonce: nonce,
     options: {
       submitForSettlement: true
+    },
+    customer: {
+        firstName: firstName,
+        lastName: lastName,
+        email: email
     }
   }, function (err, result) {
     if (result.success || result.transaction) {

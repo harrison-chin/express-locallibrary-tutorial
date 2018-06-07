@@ -2,6 +2,7 @@ var Book = require('../models/book');
 var Author = require('../models/author');
 var Genre = require('../models/genre');
 var BookInstance = require('../models/bookinstance');
+var gateway = require('../lib/gateway');
 var async = require('async');
 
 const { body,validationResult } = require('express-validator/check');
@@ -206,6 +207,38 @@ exports.book_delete_post = function(req, res, next) {
             })
         }
     });
+};
+
+// Display book checkout form on GET.
+exports.book_checkout_get = function(req, res, next) {
+
+    async.parallel({
+        book: function(callback) {
+
+            Book.findById(req.params.id)
+                .populate('author')
+                .populate('genre')
+                .exec(callback);
+        },
+        // book: function(callback) {
+        //     Book.findById(req.params.id).exec(callback)
+        // },
+        books_bookinstances: function(callback) {
+            BookInstance.find({ 'book': req.params.id }).exec(callback)
+        },
+    }, function(err, results) {
+        if (err) { return next(err); }
+        if (results.book==null) { // No results.
+            res.redirect('/catalog/books');
+        }
+
+        console.log('\033[0;32m Trace: \033[0m enter /checkouts/new');
+        gateway.clientToken.generate({}, function (err, response) {
+            console.log('\033[0;32m Client Token: \033[0m' + response.clientToken);
+            res.render('checkouts/new', {clientToken: response.clientToken, book:  results.book});
+        });
+    });
+
 };
 
 // Display book update form on GET.
