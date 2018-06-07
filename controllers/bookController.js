@@ -102,6 +102,7 @@ exports.book_create_post = [
     body('author', 'Author must not be empty.').isLength({ min: 1 }).trim(),
     body('summary', 'Summary must not be empty.').isLength({ min: 1 }).trim(),
     body('isbn', 'ISBN must not be empty').isLength({ min: 1 }).trim(),
+    body('price', 'Price must not be empty.').isLength({ min: 1 }).trim(),
 
     // Sanitize fields (using wildcard).
     sanitizeBody('*').trim().escape(),
@@ -118,6 +119,7 @@ exports.book_create_post = [
             author: req.body.author,
             summary: req.body.summary,
             isbn: req.body.isbn,
+            price: req.body.price,
             genre: req.body.genre
            });
 

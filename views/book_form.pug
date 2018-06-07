@@ -20,7 +20,10 @@ block content
       input#summary.form-control(type='textarea', placeholder='Summary' name='summary' value=(undefined===book ? '' : book.summary) required='true')
     div.form-group
       label(for='isbn') ISBN:
-      input#isbn.form-control(type='text', placeholder='ISBN13' name='isbn' value=(undefined===book ? '' : book.isbn) required='true') 
+      input#isbn.form-control(type='text', placeholder='ISBN13' name='isbn' value=(undefined===book ? '' : book.isbn) required='true')
+    div.form-group
+      label(for='price') Price:
+      input#price.form-control(type='text', placeholder='0' name='price' value=(undefined === book ? '' : book.price) required='true')
     div.form-group
       label Genre:
       div
