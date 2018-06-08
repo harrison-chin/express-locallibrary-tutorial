@@ -63,7 +63,7 @@ router.get('/', function(req, res, next) {
 // GET request for list of all Book items.
 router.get('/books', function(request, response){
   // response.send('api route to get books list');
-  Book.find({}, 'title author')
+  Book.find({}, 'title author price isbn summary')
   .populate('author')
   .exec(function (err, list_books) {
     if (err) { return next(err); }
