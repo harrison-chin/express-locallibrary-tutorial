@@ -57,6 +57,23 @@ function createResultObject(transaction) {
   return result;
 }
 
+
+// GET /register
+router.get('/register', function(req, res, next) {
+    return res.render('register', { title: 'Sign Up' });
+});
+
+// GET /about
+router.get('/about', function(req, res, next) {
+    return res.render('about', { title: 'About' });
+});
+
+// GET /contact
+router.get('/contact', function(req, res, next) {
+  return res.render('contact', { title: 'Contact' });
+});
+
+
 /// BOOK ROUTES ///
 
 // GET catalog home page.

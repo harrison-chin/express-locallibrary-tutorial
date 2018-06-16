@@ -4,6 +4,7 @@ var Genre = require('../models/genre');
 var BookInstance = require('../models/bookinstance');
 var gateway = require('../lib/gateway');
 var async = require('async');
+var mid = require('../middleware');
 
 const { body,validationResult } = require('express-validator/check');
 const { sanitizeBody } = require('express-validator/filter');
@@ -27,12 +28,12 @@ exports.index = function(req, res) {
             Genre.count({}, callback);
         },
     }, function(err, results) {
-        res.render('index', { title: 'Local Library Home', error: err, data: results });
+        res.render('index', { title: 'My Book Store', error: err, data: results });
     });
 };
 
 // Display list of all books.
-exports.book_list = function(req, res) {
+exports.book_list = function(req, res, next) {
 
   Book.find({}, 'title author price')
   .populate('author')
@@ -244,16 +245,35 @@ exports.book_checkout_get = function(req, res, next) {
 // Display book update form on GET.
 exports.book_update_get = function(req, res, next) {
 
-  Genre.findById(req.params.id, function(err, genre) {
-      if (err) { return next(err); }
-      if (genre==null) { // No results.
-          var err = new Error('Genre not found');
-          err.status = 404;
-          return next(err);
-      }
-      // Success.
-      res.render('genre_form', { title: 'Update Genre', genre: genre });
-  });
+    // Get book, authors and genres for form.
+    async.parallel({
+        book: function(callback) {
+            Book.findById(req.params.id).populate('author').populate('genre').exec(callback);
+        },
+        authors: function(callback) {
+            Author.find(callback);
+        },
+        genres: function(callback) {
+            Genre.find(callback);
+        },
+    }, function(err, results) {
+        if (err) { return next(err); }
+        if (results.book==null) { // No results.
+            var err = new Error('Book not found');
+            err.status = 404;
+            return next(err);
+        }
+        // Success.
+        // Mark our selected genres as checked.
+        for (var all_g_iter = 0; all_g_iter < results.genres.length; all_g_iter++) {
+            for (var book_g_iter = 0; book_g_iter < results.book.genre.length; book_g_iter++) {
+                if (results.genres[all_g_iter]._id.toString()==results.book.genre[book_g_iter]._id.toString()) {
+                    results.genres[all_g_iter].checked='true';
+                }
+            }
+        }
+        res.render('book_form', { title: 'Update Book', authors:results.authors, genres:results.genres, book: results.book });
+    });
 };
 
 // Handle book update on POST.
