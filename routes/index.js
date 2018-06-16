@@ -100,7 +100,7 @@ router.post('/register', function(req, res, next) {
 })
 
 // GET home page.
-router.get('/', function(req, res) {
+router.get('/', mid.requiresLogin, function(req, res) {
     // return res.render('index', { title: 'Home' });
     res.redirect('/catalog');
 });

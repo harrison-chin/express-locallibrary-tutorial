@@ -1,5 +1,6 @@
 var express = require('express');
 var router = express.Router();
+var mid = require('../middleware');
 
 // Require controller modules.
 var book_controller = require('../controllers/bookController');
@@ -73,14 +74,24 @@ router.get('/contact', function(req, res, next) {
   return res.render('contact', { title: 'Contact' });
 });
 
+// GET /login
+router.get('/login', function(req, res, next) {
+    return res.render('login', { title: 'Login' });
+});
+
+// GET /profile
+router.get('/profile', function(req, res, next) {
+    return res.render('profile', { title: 'Profile' });
+});
+
 
 /// BOOK ROUTES ///
 
 // GET catalog home page.
-router.get('/', book_controller.index);
+router.get('/', mid.requiresLogin, book_controller.index);
 
 // GET request for creating a Book. NOTE This must come before routes that display Book (uses id).
-router.get('/book/create', book_controller.book_create_get);
+router.get('/book/create', mid.requiresLogin, book_controller.book_create_get);
 
 // POST request for creating Book.
 router.post('/book/create', book_controller.book_create_post);
@@ -98,18 +109,18 @@ router.get('/book/:id/update', book_controller.book_update_get);
 router.post('/book/:id/update', book_controller.book_update_post);
 
 // GET request for one Book.
-router.get('/book/:id', book_controller.book_detail);
+router.get('/book/:id', mid.requiresLogin, book_controller.book_detail);
 
 // GET request to checkout Book.
 router.get('/book/:id/checkout', book_controller.book_checkout_get);
 
 // GET request for list of all Book items.
-router.get('/books', book_controller.book_list);
+router.get('/books', mid.requiresLogin, book_controller.book_list);
 
 /// AUTHOR ROUTES ///
 
 // GET request for creating Author. NOTE This must come before route for id (i.e. display author).
-router.get('/author/create', author_controller.author_create_get);
+router.get('/author/create', mid.requiresLogin, author_controller.author_create_get);
 
 // POST request for creating Author.
 router.post('/author/create', author_controller.author_create_post);
@@ -127,15 +138,15 @@ router.get('/author/:id/update', author_controller.author_update_get);
 router.post('/author/:id/update', author_controller.author_update_post);
 
 // GET request for one Author.
-router.get('/author/:id', author_controller.author_detail);
+router.get('/author/:id', mid.requiresLogin, author_controller.author_detail);
 
 // GET request for list of all Authors.
-router.get('/authors', author_controller.author_list);
+router.get('/authors', mid.requiresLogin, author_controller.author_list);
 
 /// GENRE ROUTES ///
 
 // GET request for creating a Genre. NOTE This must come before route that displays Genre (uses id).
-router.get('/genre/create', genre_controller.genre_create_get);
+router.get('/genre/create', mid.requiresLogin, genre_controller.genre_create_get);
 
 //POST request for creating Genre.
 router.post('/genre/create', genre_controller.genre_create_post);
@@ -153,15 +164,15 @@ router.get('/genre/:id/update', genre_controller.genre_update_get);
 router.post('/genre/:id/update', genre_controller.genre_update_post);
 
 // GET request for one Genre.
-router.get('/genre/:id', genre_controller.genre_detail);
+router.get('/genre/:id', mid.requiresLogin, genre_controller.genre_detail);
 
 // GET request for list of all Genre.
-router.get('/genres', genre_controller.genre_list);
+router.get('/genres', mid.requiresLogin, genre_controller.genre_list);
 
 /// BOOKINSTANCE ROUTES ///
 
 // GET request for creating a BookInstance. NOTE This must come before route that displays BookInstance (uses id).
-router.get('/bookinstance/create', book_instance_controller.bookinstance_create_get);
+router.get('/bookinstance/create', mid.requiresLogin, book_instance_controller.bookinstance_create_get);
 
 // POST request for creating BookInstance.
 router.post('/bookinstance/create', book_instance_controller.bookinstance_create_post);
@@ -179,10 +190,10 @@ router.get('/bookinstance/:id/update', book_instance_controller.bookinstance_upd
 router.post('/bookinstance/:id/update', book_instance_controller.bookinstance_update_post);
 
 // GET request for one BookInstance.
-router.get('/bookinstance/:id', book_instance_controller.bookinstance_detail);
+router.get('/bookinstance/:id', mid.requiresLogin, book_instance_controller.bookinstance_detail);
 
 // GET request for list of all BookInstance.
-router.get('/bookinstances', book_instance_controller.bookinstance_list);
+router.get('/bookinstances', mid.requiresLogin, book_instance_controller.bookinstance_list);
 
 /// STRIPE PAYMENT ROUTES ///
 
