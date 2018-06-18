@@ -1,8 +1,12 @@
-extends ../layout_braintree
+extends ../layout
 
 block content
   .wrapper: .checkout.container: .content
 
+    br
+    br
+    br
+    br
     h1 #[strong Checkout Book]
     hr
     p #[strong Title:] #{book.title}
@@ -10,42 +14,35 @@ block content
     p #[strong ISBN:] #{book.isbn}
     p #[strong Price:] $#{book.price}
     hr
-    h4 #[strong Pay with Braintree using PayPal or credit card]
-
     hr
+    h4 #[strong Pay with Braintree using PayPal or credit card]
 
     - var payamount = book.price
     - var customer_firstName = "John"
     - var customer_lastName = "Doe"
     - var customer_email = "John.Doe@test.com"
     form#payment-form(action="/catalog/checkouts", method="post")
+      div.form-group
+      label(for='amount') Pay Amount ($):
+      input#amount.form-control(type='text' name='amount' required='true' value=payamount readonly="true")
+      div.form-group
+      label(for='firstName') First Name:
+      input#firstName.form-control(type='text' placeholder=customer_firstName name='firstName' required='true' value="")
+      label(for='lastName') Last Name:
+      input#lastName.form-control(type='text' placeholder=customer_lastName name='lastName' required='true' value="")
+      label(for='email') Email:
+      input#email.form-control(type='text' placeholder=customer_email name='email' required='true' value="")
+
       section
-        label(for="amount")
-          span.input-label Amount
-          .input-wrapper.amount-wrapper
-            input#amount(name="amount" type="tel" min="1" value=payamount readonly="true")
-
-        label(for="firstName")
-          span.input-label First Name
-          .input-wrapper
-            input#firstName(name="firstName" value=customer_firstName)
-        label(for="email")
-          span.input-label Last Name
-          .input-wrapper
-            input#lastName(name="lastName" value=customer_lastName)
-        label(for="email")
-          span.input-label Email
-          .input-wrapper
-            input#email(name="email" value=customer_email)
-
-        hr
-
         hr
         .bt-drop-in-wrapper
           #bt-dropin
       input#nonce(type="hidden" name="payment_method_nonce")
-      button.button(type="submit")
+      hr
+      button.btn.btn-important(type='submit')
         span Place Order
+
+      hr
 
   script(src="https://js.braintreegateway.com/web/dropin/1.10.0/js/dropin.min.js")
   script.

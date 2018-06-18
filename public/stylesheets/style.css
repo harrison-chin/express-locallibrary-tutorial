@@ -46,7 +46,7 @@ a:hover {
 /* Button Styles */
 .btn-primary {
     background: #417aba;
-    border-color: #417aba;
+    border-color: #3b4c86;
 }
 .btn-info {
     background-color: #31b0d5;
@@ -66,6 +66,11 @@ a:hover {
 .active,
 .btn {
     transition: .4s;
+}
+.btn-important {
+    background: #15d518;
+    border-color: #138104;
+    color: white;
 }
 
 /* Icon Styles */

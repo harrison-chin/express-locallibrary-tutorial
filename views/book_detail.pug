@@ -38,15 +38,14 @@ block content
     else
       p There are no copies of this book in the library.
   
-  hr    
+  hr
   p
-    a(href=book.url+'/delete') Delete Book
+    a.btn.btn-primary(href=book.url+'/delete') Delete this Book
   p
-    a(href=book.url+'/update') Update Book
+    a.btn.btn-primary(href=book.url+'/update') Update this Book
 
-  hr  
-  //p
-  //  a(href='/catalog/stripepay') Buy Book (By Stripe)
+  hr
   p
-    a(href=book.url+'/checkout') Check Out Book (By BrainTree)
-    //a(href='/catalog/braintreepay') Check Out Book (By BrainTree)
+    a.btn.btn-important(href=book.url + '/checkout') Check Out this Book
+
+

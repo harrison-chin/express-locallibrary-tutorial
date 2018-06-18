@@ -205,7 +205,7 @@ router.get('/bookinstances', mid.requiresLogin, book_instance_controller.bookins
 // router.get("/stripepay", (req, res) =>
 //   res.render("stripe_pay.pug", {keyPublishable}));
 //
-// router.post("/charge", (req, res) => {
+// router.post("/stripecharge", (req, res) => {
 //   let amount = 500;
 //
 //   stripe.customers.create({
@@ -215,11 +215,11 @@ router.get('/bookinstances', mid.requiresLogin, book_instance_controller.bookins
 //   .then(customer =>
 //     stripe.charges.create({
 //       amount,
-//       description: "Sample Charge",
+//       description: "Sample Stripe Charge",
 //          currency: "usd",
 //          customer: customer.id
 //     }))
-//   .then(charge => res.render("charge.pug"));
+//   .then(charge => res.render("stripe_charge.pug"));
 // });
 
 /// BRAINTREE PAYMENT ROUTES ///

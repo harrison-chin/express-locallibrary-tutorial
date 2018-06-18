@@ -1,6 +1,6 @@
 html
   body
-    form(action="/catalog/charge", method="post")
+    form(action="/catalog/stripe_charge", method="post")
       article
         label Amount: $5.00
       script(
@@ -8,5 +8,5 @@ html
         class="stripe-button",
         data-key=keyPublishable,
         data-locale="auto",
-        data-description="Sample Charge",
+        data-description="Sample Stripe Charge",
         data-amount="500")
